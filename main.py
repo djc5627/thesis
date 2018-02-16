@@ -132,8 +132,8 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
 
     #DONE: Prepare positive training data to get form (x,y,r,L(x,y,r))
     #DONE: Prepare negative samples (x'',y'',r'') for  each positive entry
-    #TODO: Generate bathes from training set
-    #TODO: Get g_ val from training data
+    #DONE: Generate bathes from training set
+    #DONE: Get g_ val from training data
 
     # Input
     x = tf.placeholder(tf.float32, [None, NUM_NODES])
@@ -145,17 +145,12 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     y_id = tf.placeholder(tf.int32, [None])
     r_id = tf.placeholder(tf.int32, [None])
 
-    print ("SIZE OF P_ TENSOR")
-    print tf.shape(p_)
-    print tf.size(p_)
 
 
-    #TODO: instantiate learned weights with rand uniform dist (mp2vec_s.py)
+    #DONE: instantiate learned weights with rand uniform dist (mp2vec_s.py)
     #TODO: Case where Wx = Wy
     # Learned weights
-    #Wx = tf.Variable(tf.zeros([NUM_NODES, options.dim]))
-    #Wy = tf.Variable(tf.zeros([NUM_NODES, options.dim]))
-    #Wr = tf.Variable(tf.zeros([NUM_REL, options.dim]))
+
 
     Wx = tf.Variable(np.random.uniform(low=-0.5/options.dim,
                                 high=0.5/options.dim,
@@ -166,12 +161,6 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     Wr = tf.Variable(np.random.uniform(low=-0.5 / options.dim,
                                        high=0.5 / options.dim,
                                        size=(NUM_NODES, options.dim)).astype(np.float32))
-
-    #TODO: actually use transpose or not? no means aggregate vec are [None, d] shape
-    # Transpose
-    tWx = tf.transpose(Wx)
-    tWy = tf.transpose(Wy)
-    tWr = tf.transpose(Wr)
 
     # Aggregate Vectors
     Wx_x = tf.matmul(x, Wx)
@@ -192,17 +181,12 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     # Hidden Layer (element-wise mult)
     #h = tf.multiply(tf.multiply(Wx_x, Wy_y), Wr_r)
     h = tf.multiply(tf.multiply(Wx_x_id, Wy_y_id), Wr_r_id)
-    print ("SIZE OF H TENSOR")
-    print tf.shape(h)
-    print tf.size(h)
+
 
     # Output (sigmoid of element summation), reduce the sum along dim and keep [None] dim
     #p = tf.nn.sigmoid(tf.reduce_sum(h, 1))
     p = tf.reduce_sum(h, 1, keep_dims=False)
 
-    print ("SIZE OF P TENSOR")
-    print tf.shape(p)
-    print tf.size(p)
 
     #TODO: Implement obj version for binary step
     # Objective Function
@@ -220,8 +204,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
 
     #DONE: calculate accuracy correctly
     # Accuracy
-    rr = tf.round(tf.sigmoid(p))
-    correct_prediction = tf.equal(rr, p_)
+    correct_prediction = tf.equal(tf.round(tf.sigmoid(p)), p_)
 
 
     u = tf.cast(correct_prediction,tf.float32)
@@ -256,16 +239,6 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
                                             x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
             print('step %d, training accuracy %f' % (i, train_accuracy))
 
-            n = sess.run(p, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
-                                            x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
-            n_ = sess.run(p_, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
-                                            x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
-            rrr = sess.run(rr, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
-                                            x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
-            cc = sess.run(correct_prediction, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
-                                            x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
-            uu = sess.run(u, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
-                                            x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
 
             Wxx = sess.run(Wx, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
                                         x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
