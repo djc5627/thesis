@@ -141,9 +141,9 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     r = tf.placeholder(tf.float32, [None, NUM_REL])
     p_ = tf.placeholder(tf.float32, [None])
 
-    x_id = tf.placeholder(tf.int32, [None, NUM_NODES])
-    y_id = tf.placeholder(tf.int32, [None, NUM_NODES])
-    r_id = tf.placeholder(tf.int32, [None, NUM_NODES])
+    x_id = tf.placeholder(tf.int32, [None])
+    y_id = tf.placeholder(tf.int32, [None])
+    r_id = tf.placeholder(tf.int32, [None])
 
     print ("SIZE OF P_ TENSOR")
     print tf.shape(p_)
