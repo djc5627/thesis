@@ -204,7 +204,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     print tf.shape(p)
     print tf.size(p)
 
-    #TODO: Implement obj version for sigmoid
+    #TODO: Implement obj version for binary step
     # Objective Function
     #objective = tf.cond(tf.equal(p_,  1), lambda: p, lambda: 1-p)
     objective = tf.nn.sigmoid_cross_entropy_with_logits(labels=p_, logits=p)
@@ -213,7 +213,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
 
 
 
-    #TODO: Take negative of obj or not?
+    #DONE: Take negative of obj or not?
     # Train step (want to minimize negative of objective)
     train_step = tf.train.GradientDescentOptimizer(options.alpha).minimize(objective)
 
@@ -222,8 +222,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     # Accuracy
     rr = tf.round(tf.sigmoid(p))
     correct_prediction = tf.equal(rr, p_)
-    #correct_prediction = tf.sigmoid(p)
-    #correct_prediction = tf.cast(correct_prediction, tf.float32)
+
 
     u = tf.cast(correct_prediction,tf.float32)
     accuracy = tf.reduce_mean(u)
@@ -236,8 +235,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
 
     #TODO: integreate -i iterations option
     #TODO: train all data one at a time? or train random data points at a time?
-    #DONE: feed negative data (REMOVE G_=1)
-    #DONE: why are the tensors empty
+
     step = 50
     for j in xrange(0,100):
         print ("epoch " + str(j) + " -----------------")
@@ -269,13 +267,29 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
             uu = sess.run(u, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
                                             x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
 
-            #print (uu)
+            Wxx = sess.run(Wx, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
+                                        x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
 
-            #for nn, nn_, rrrr, ccc, uuu in zip(n, n_, rrr, cc, uu):
-                #print nn, nn_, rrrr, ccc, uuu
-                #raw_input()
 
-            #print (sess.run(p, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val}))
+            np.savetxt('node_vec_temp.txt', Wxx, delimiter=' ')
+
+    #Output vectors to file
+    lines = []
+    lines.append(str(NUM_NODES) + " " + str(options.dim) + "\n")
+
+    tmpLines = []
+    with open("node_vec_temp.txt", "r") as f:
+        for l in f:
+            tmpLines.append(l)
+
+    for i in xrange(0, NUM_NODES):
+        lines.append(str(i+1) + " " + tmpLines[i])
+
+    with open("node_vec.txt", "w+") as out:
+        for l in lines:
+            out.write(l)
+
+
 
 
     #TODO: Output node and path vectors to file
