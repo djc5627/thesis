@@ -8,7 +8,7 @@ import networkx as nx
 import optparse
 import sys
 
-from tools import exp_classification
+import exp_classification
 
 
 

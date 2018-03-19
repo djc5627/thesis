@@ -455,6 +455,9 @@ def train_process(pid, node_vocab, path_vocab, Wx, Wy, Wpath,
     table = tables['all']
     cur_win = win
 
+    pos_data_file = open('pos_data.txt', 'w')
+    neg_data_file = open('neg_data.txt', 'w')
+
     for iteration in range(iterations):
         word_count = 0
         first = True
@@ -479,8 +482,7 @@ def train_process(pid, node_vocab, path_vocab, Wx, Wy, Wpath,
                 edge_walk = [x for i, x in enumerate(walk)
                              if i % 2 == 1]
 
-                pos_data_file = open('pos_data.txt', 'w')
-                neg_data_file = open('neg_data.txt', 'w')
+
 
 
                 for i, x in enumerate(node_index_walk):

@@ -79,7 +79,7 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     r_data = []
     p_data = []
 
-    #DONE: Fix the append causes errors randomly, there is problem with generation of test data to file
+    #TODO: Fix the append causes errors randomly, there is problem with generation of test data to file
     with open("pos_data.txt", "r") as pos:
         with open("neg_data.txt", "r") as neg:
             for l in pos:
@@ -136,9 +136,9 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     #DONE: Get g_ val from training data
 
     # Input
-    x = tf.placeholder(tf.float32, [None, NUM_NODES])
-    y = tf.placeholder(tf.float32, [None, NUM_NODES])
-    r = tf.placeholder(tf.float32, [None, NUM_REL])
+    #x = tf.placeholder(tf.float32, [None, NUM_NODES])
+    #y = tf.placeholder(tf.float32, [None, NUM_NODES])
+    #r = tf.placeholder(tf.float32, [None, NUM_REL])
     p_ = tf.placeholder(tf.float32, [None])
 
     x_id = tf.placeholder(tf.int32, [None])
@@ -158,21 +158,21 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     Wy = tf.Variable(np.random.uniform(low=-0.5 / options.dim,
                                        high=0.5 / options.dim,
                                        size=(NUM_NODES, options.dim)).astype(np.float32))
-    Wr = tf.Variable(np.random.uniform(low=-0.5 / options.dim,
-                                       high=0.5 / options.dim,
+    Wr = tf.Variable(np.random.uniform(low=0.0/options.dim,
+                                high=1.0/options.dim,
                                        size=(NUM_NODES, options.dim)).astype(np.float32))
 
     # Aggregate Vectors
-    Wx_x = tf.matmul(x, Wx)
-    Wy_y = tf.matmul(y, Wx)
+    #Wx_x = tf.matmul(x, Wx)
+    #Wy_y = tf.matmul(y, Wy)
 
     Wx_x_id = tf.nn.embedding_lookup(Wx, x_id)
-    Wy_y_id = tf.nn.embedding_lookup(Wy, y_id)
+    Wy_y_id = tf.nn.embedding_lookup(Wx, y_id)
     Wr_r_id = tf.round(tf.nn.sigmoid(tf.nn.embedding_lookup(Wr, r_id)))
 
     #TODO: Make binary step default and option to use sigmoid
     # Regularization of Wr (Binary step by rounding sigmoid)
-    Wr_r = tf.round(tf.nn.sigmoid(tf.matmul(r, Wr)))
+    #Wr_r = tf.round(tf.nn.sigmoid(tf.matmul(r, Wr)))
 
     # Regularization of Wr (just sigmoid)
     #Wr_r = tf.nn.sigmoid(tf.multiply(tWr, r))
@@ -220,31 +220,78 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
     #TODO: train all data one at a time? or train random data points at a time?
 
     step = 50
-    for j in xrange(0,100):
+    for j in xrange(0,1):
         print ("epoch " + str(j) + " -----------------")
         for i in xrange(0, len(x_data), step):
-            x_val = x_onehot[i:i+step]
-            y_val = y_onehot[i:i+step]
-            r_val = r_onehot[i:i+step]
+            #x_val = x_onehot[i:i+step]
+            #y_val = y_onehot[i:i+step]
+            #r_val = r_onehot[i:i+step]
             p__val = p_np[i:i+step]
 
             x_id_val = x_data[i:i+step]
-            y_id_val = y_data[i:i + step]
-            r_id_val = r_data[i:i + step]
+            y_id_val = y_data[i:i+step]
+            r_id_val = r_data[i:i+step]
 
-            sess.run(train_step, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
+            #print(str(x_id_val) + str(y_id_val) + str(r_id_val) + str(p__val))
+            #raw_input()
+
+            '''
+            Wx_row = sess.run(Wx_x_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            Wy_row = sess.run(Wy_y_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            Wr_row = sess.run(Wr_r_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            p_res = sess.run(p, feed_dict={p_: p__val,
+                                                 x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            print(Wx_row)
+            print(Wy_row)
+            print(Wr_row)
+            print(p_res)
+            raw_input()
+            '''
+
+            sess.run(train_step, feed_dict={p_: p__val,
                                             x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
 
-            train_accuracy = sess.run(accuracy, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
+            train_accuracy = sess.run(accuracy, feed_dict={p_: p__val,
                                             x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
             print('step %d, training accuracy %f' % (i, train_accuracy))
 
 
-            Wxx = sess.run(Wx, feed_dict={x: x_val, y: y_val, r: r_val, p_: p__val,
+            Wxx = sess.run(Wx, feed_dict={p_: p__val,
                                         x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
 
 
             np.savetxt('node_vec_temp.txt', Wxx, delimiter=' ')
+
+
+
+
+            '''
+            Wx_row = sess.run(Wx_x_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            Wy_row = sess.run(Wy_y_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            Wr_row = sess.run(Wr_r_id, feed_dict={p_: p__val,
+                                                  x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            p_res = sess.run(p, feed_dict={p_: p__val,
+                                                 x_id: x_id_val, y_id: y_id_val, r_id: r_id_val})
+
+            print(Wx_row)
+            print(Wy_row)
+            print(Wr_row)
+            print(p_res)
+            raw_input()
+            '''
 
     #Output vectors to file
     lines = []
@@ -255,8 +302,9 @@ def main(graph_fname, node_vec_fname, path_vec_fname, options):
         for l in f:
             tmpLines.append(l)
 
+    id2name = dict([(id_, name) for name, id_ in g.node2id.items()])
     for i in xrange(0, NUM_NODES):
-        lines.append(str(i+1) + " " + tmpLines[i])
+        lines.append(str(id2name[i]) + " " + tmpLines[i])
 
     with open("node_vec.txt", "w+") as out:
         for l in lines:
